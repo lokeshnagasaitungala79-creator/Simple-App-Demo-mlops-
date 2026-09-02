@@ -1,4 +1,5 @@
 stages:
+
   load_data:
     cmd: python src/load_data.py
     deps:
@@ -8,6 +9,7 @@ stages:
       - data_given/winequality.csv
     outs:
       - data/raw/winequality.csv
+
   split_data:
     cmd: python src/split_data.py
     deps:
@@ -15,6 +17,8 @@ stages:
       - src/get_data.py
       - params.yaml
       - data/raw/winequality.csv
+    params:
+      - split_data.test_size
     outs:
-      - data/train/winequality.csv
-      - data/test/winequality.csv
+      - data/processed/train_winequality.csv
+      - data/processed/test_winequality.csv
