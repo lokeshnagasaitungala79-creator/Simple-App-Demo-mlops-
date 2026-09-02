@@ -1,3 +1,5 @@
+#local package
+-e.
 dvc
 dvc[gdrive]
 scikit-learn

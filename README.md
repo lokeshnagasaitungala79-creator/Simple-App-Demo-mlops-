@@ -331,6 +331,25 @@ Monitoring
 * MLflow
 * VS Code
 
+
+tox command .
+```bash
+tox 
+```
+for rebuilding .
+``` bash
+tox -r
+
+pytest command
+```bash
+pytest -v
+
+setup commands : -
+pip install -e.
+
+build your own package command:-
+python setup.py sdist bdist_wheel
+
 ---
 
 ## Author
