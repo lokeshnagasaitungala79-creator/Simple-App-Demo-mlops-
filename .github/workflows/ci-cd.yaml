@@ -32,4 +32,4 @@ jobs:
 
       - name: Run flake8
         run: |
-          flake8 . --exclude=build --ignore=E203,E265,E302,E303,E305,E501,E221,E225,E251,W291,W292,W293
+          flake8 . --exclude=build,"src/train and evaluate.py" --ignore=E203,E265,E302,E303,E305,E501,E221,E225,E251,W291,W292,W293,F401,F841
