@@ -1,0 +1,5 @@
+{
+    "alpha": 0.88,
+    "l1_ratio": 0.89,
+    "random_state": 42
+}
