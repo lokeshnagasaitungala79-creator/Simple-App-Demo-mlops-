@@ -68,3 +68,19 @@ def test_form_response_correct_range():
 def test_api_response_correct_range(data = input_data["correct Range"]):
     res = api_response(data)
     assert TARGET_range["min"] <= res["response"] <= TARGET_range["max"]
+
+def test_form_response_incorrect_range(data = input_data["Incorrect Range"]):
+    with pytest.raises(prediction_service.prediction.NotInRange):
+        res = form_response
+
+def test_api_response_Incorrect_Range(data = input_data["Incorrect Range"]):
+    with pytest.raises(prediction_service.prediction.NotInRange):
+        res = form_response(data)
+
+def test_api_response_incorrect_range(data = input_data["Incorrect Range"]):
+    res = api_response(data)
+    assert res["response"] == prediction_service.prediction.NotInRange().message
+
+def test_api_response_Incorrect_col(data = input_data["Incorrect Col"]):
+        res = form_response(data)
+        assert res["response"] == prediction_service.prediction.NotInCols().message
