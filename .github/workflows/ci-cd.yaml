@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - main-mlflow
   pull_request:
     branches:
       - main
+      - main-mlflow
 
 jobs:
   test:
@@ -30,7 +32,15 @@ jobs:
       - name: Run tests
         run: |
           pytest -v
+      - name : Deploy to heroku 
 
       - name: Run flake8
         run: |
           flake8 .
+        env:
+          HEROKU_API_TOKEN : ${{secrets.HEROKU_API_TOKEN}}
+          HEROKU_API_NAME : ${{secrets.HEROKU_API_NAME}}
+        if : github.ref == 'refs/heads/main-mlflow' && job.status == 'sucess'
+        run :
+          git remote add heroku https://heroku:$HEROKU_API_TOKEN@git.heoku.com/$HEROKU_APP_NAME.git
+          git push heroku HEAD:main -f
