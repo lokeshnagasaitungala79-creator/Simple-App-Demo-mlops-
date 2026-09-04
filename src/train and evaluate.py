@@ -1,12 +1,17 @@
-import os
 import argparse
-import pandas as pd
-import numpy as np
-from sklearn.linear_model import ElasticNet
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-import yaml
-import joblib
 import json
+import os
+import joblib
+import mlflow
+import numpy as np
+import pandas as pd
+import yaml
+from sklearn.linear_model import ElasticNet
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from get_data import read_params
+from urllib.parse import urlparse
+import argparse
 
 
 def read_params(config_path):
@@ -51,62 +56,88 @@ def train_and_evaluate(config_path):
     print("Training data shape:", train_x.shape)
     print("Testing data shape:", test_x.shape)
 
-    model = ElasticNet(
-        alpha=alpha,
-        l1_ratio=l1_ratio,
-        random_state=42
-    )
+    ######################    MLFLOW          ####################################
+    mlflow_config = config["mlflow_config"]
+    remote_server_url = mlflow_config["remote_server_url"]
+    mlflow.set_tracking_uri(remote_server_url)
+    mlflow.set_experiment(mlflow_config["experiment_name"])
 
-    model.fit(train_x, train_y)
-
-    pred = model.predict(test_x)
-
-    rmse, mae, r2 = eval_metrics(test_y, pred)
-
-    print("ElasticNet Model")
-    print("Alpha:", alpha)
-    print("L1 Ratio:", l1_ratio)
-    print("RMSE:", rmse)
-    print("MAE:", mae)
-    print("R2:", r2)
-
-    os.makedirs(os.path.dirname(scores_file), exist_ok=True)
-    os.makedirs(os.path.dirname(params_file), exist_ok=True)
-
-    with open(scores_file, "w") as f:
-        json.dump(
-            {
-                "rmse": rmse,
-                "mae": mae,
-                "r2": r2
-            },
-            f,
-            indent=4
+    with mlflow.start_run(run_name=mlflow_config["run_name"]) as mlops_run:
+        model = ElasticNet(
+            alpha=alpha,
+            l1_ratio=l1_ratio,
+            random_state=42
         )
 
-    with open(params_file, "w") as f:
-        json.dump(
-            {
-                "alpha": alpha,
-                "l1_ratio": l1_ratio,
-                "random_state": 42
-            },
-            f,
-            indent=4
-        )
+        model.fit(train_x, train_y)
 
-    os.makedirs(model_dir, exist_ok=True)
+        pred = model.predict(test_x)
 
-    model_path = os.path.join(model_dir, "model.joblib")
+        rmse, mae, r2 = eval_metrics(test_y, pred)
 
-    joblib.dump(model, model_path)
+        print("ElasticNet Model")
+        print("Alpha:", alpha)
+        print("L1 Ratio:", l1_ratio)
+        print("RMSE:", rmse)
+        print("MAE:", mae)
+        print("R2:", r2)
 
-    os.makedirs(os.path.dirname(webapp_model_path), exist_ok=True)
+        # MLflow logging
+        mlflow.log_param("alpha", alpha)
+        mlflow.log_param("l1_ratio", l1_ratio)
+        mlflow.log_metric("rmse", rmse)
+        mlflow.log_metric("mae", mae)
+        mlflow.log_metric("r2", r2)
 
-    joblib.dump(model, webapp_model_path)
+        #getting track
+        tracking_url_type_store = urlparse(mlflow.get_artifact_uri()).scheme
+        if tracking_url_type_store != "file":
+            mlflow.sklearn.log_module(lr , "model" , registerd_model_name=mlflow_config["registerd_model_name"])
+        else:
+            mlflow.sklearn.load_model(lr , "model")
 
-    print("Model saved at:", model_path)
-    print("Webapp model saved at:", webapp_model_path)
+        
+
+        # Log model to MLflow registry/artifact server
+        mlflow.sklearn.log_model(model, "model")
+
+        os.makedirs(os.path.dirname(scores_file), exist_ok=True)
+        os.makedirs(os.path.dirname(params_file), exist_ok=True)
+
+        with open(scores_file, "w") as f:
+            json.dump(
+                {
+                    "rmse": rmse,
+                    "mae": mae,
+                    "r2": r2
+                },
+                f,
+                indent=4
+            )
+
+        with open(params_file, "w") as f:
+            json.dump(
+                {
+                    "alpha": alpha,
+                    "l1_ratio": l1_ratio,
+                    "random_state": 42
+                },
+                f,
+                indent=4
+            )
+
+        os.makedirs(model_dir, exist_ok=True)
+
+        model_path = os.path.join(model_dir, "model.joblib")
+
+        joblib.dump(model, model_path)
+
+        os.makedirs(os.path.dirname(webapp_model_path), exist_ok=True)
+
+        joblib.dump(model, webapp_model_path)
+
+        print("Model saved at:", model_path)
+        print("Webapp model saved at:", webapp_model_path)
 
 
 if __name__ == "__main__":

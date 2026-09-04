@@ -352,6 +352,13 @@ python setup.py sdist bdist_wheel
 
 ---
 
+
+python -m mlflow server \
+  --backend-store-uri sqlite:///mlflow.db \
+  --default-artifact-root ./artifacts \
+  --host 0.0.0.0 \
+  --port 1234
+
 ## Author
 
 **Lokesh Naga Sai**

@@ -9,8 +9,8 @@ stages:
       size: 118582
     - path: params.yaml
       hash: md5
-      md5: b4012945e24c81960dcdfd7cc44de84b
-      size: 399
+      md5: 4c8c7fcf270a80d6281100e444315370
+      size: 658
     - path: src/get_data.py
       hash: md5
       md5: ab4669757122ca6d967fecb71b6cef57
@@ -33,8 +33,8 @@ stages:
       size: 119999
     - path: params.yaml
       hash: md5
-      md5: b4012945e24c81960dcdfd7cc44de84b
-      size: 399
+      md5: 4c8c7fcf270a80d6281100e444315370
+      size: 658
     - path: src/get_data.py
       hash: md5
       md5: ab4669757122ca6d967fecb71b6cef57
