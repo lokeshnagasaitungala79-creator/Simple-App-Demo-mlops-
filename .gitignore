@@ -1,0 +1,4 @@
+mlflow.db
+artifacts/
+prediction_service/model/
+saved_models/
