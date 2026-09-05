@@ -9,8 +9,8 @@ stages:
       size: 118582
     - path: params.yaml
       hash: md5
-      md5: 4c8c7fcf270a80d6281100e444315370
-      size: 658
+      md5: a340fae3bce1f84fd0a0199288d26c97
+      size: 650
     - path: src/get_data.py
       hash: md5
       md5: ab4669757122ca6d967fecb71b6cef57
@@ -33,8 +33,8 @@ stages:
       size: 119999
     - path: params.yaml
       hash: md5
-      md5: 4c8c7fcf270a80d6281100e444315370
-      size: 658
+      md5: a340fae3bce1f84fd0a0199288d26c97
+      size: 650
     - path: src/get_data.py
       hash: md5
       md5: ab4669757122ca6d967fecb71b6cef57
@@ -55,3 +55,14 @@ stages:
       hash: md5
       md5: 7f108206b4ed85082e2c078cd2329e2e
       size: 95458
+  log_production_model:
+    cmd: python src/log_production_model.py --config=params.yaml
+    deps:
+    - path: params.yaml
+      hash: md5
+      md5: a340fae3bce1f84fd0a0199288d26c97
+      size: 650
+    - path: src/log_production_model.py
+      hash: md5
+      md5: c571ec1e2d301af7f44c522af888ab47
+      size: 5122

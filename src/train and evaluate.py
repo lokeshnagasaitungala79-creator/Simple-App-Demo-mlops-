@@ -8,10 +8,7 @@ import pandas as pd
 import yaml
 from sklearn.linear_model import ElasticNet
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
-from get_data import read_params
 from urllib.parse import urlparse
-import argparse
 
 
 def read_params(config_path):
@@ -82,25 +79,31 @@ def train_and_evaluate(config_path):
         print("MAE:", mae)
         print("R2:", r2)
 
-        # MLflow logging
+        # MLflow logging parameters and metrics
         mlflow.log_param("alpha", alpha)
         mlflow.log_param("l1_ratio", l1_ratio)
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("r2", r2)
 
-        #getting track
+        # Log model to MLflow registry if using a remote backend, else log locally
         tracking_url_type_store = urlparse(mlflow.get_artifact_uri()).scheme
+        
         if tracking_url_type_store != "file":
-            mlflow.sklearn.log_module(lr , "model" , registerd_model_name=mlflow_config["registerd_model_name"])
+            mlflow.sklearn.log_model(
+                sk_model=model,
+                artifact_path="model",
+                registered_model_name=mlflow_config["registered_model_name"]
+            )
         else:
-            mlflow.sklearn.load_model(lr , "model")
-
+            mlflow.sklearn.log_model(
+                model,
+                "model",
+                registered_model_name=mlflow_config["registered_model"]
+            )
         
 
-        # Log model to MLflow registry/artifact server
-        mlflow.sklearn.log_model(model, "model")
-
+        # Save metrics report
         os.makedirs(os.path.dirname(scores_file), exist_ok=True)
         os.makedirs(os.path.dirname(params_file), exist_ok=True)
 
@@ -126,14 +129,12 @@ def train_and_evaluate(config_path):
                 indent=4
             )
 
+        # Save local artifacts (.joblib files)
         os.makedirs(model_dir, exist_ok=True)
-
         model_path = os.path.join(model_dir, "model.joblib")
-
         joblib.dump(model, model_path)
 
         os.makedirs(os.path.dirname(webapp_model_path), exist_ok=True)
-
         joblib.dump(model, webapp_model_path)
 
         print("Model saved at:", model_path)
@@ -142,7 +143,7 @@ def train_and_evaluate(config_path):
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
-    args.add_argument("--config", required=True)
+    args.add_argument("--config", default="params.yaml")
 
     parsed_args = args.parse_args()
 
